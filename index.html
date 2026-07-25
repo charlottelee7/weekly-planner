@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colour Sort Game</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <section id="homeScreen" class="screen">
+      <h1>Colour Sort Game</h1>
+      <p class="subtitle">Choose your setup, then tap start.</p>
+
+      <div class="setup-box">
+        <label for="colourCount">Number of colours</label>
+        <select id="colourCount">
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+        </select>
+
+        <label for="tubeCount">Number of tubes</label>
+        <select id="tubeCount">
+          <option value="5">5</option>
+          <option value="6" selected>6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+          <option value="14">14</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+        </select>
+
+        <p id="setupMessage" class="message"></p>
+
+        <button id="startBtn" class="big-btn">Start</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen hidden">
+      <div class="top-bar">
+        <button id="backBtn" class="small-btn">Home</button>
+        <button id="undoBtn" class="small-btn">Undo</button>
+        <button id="restartBtn" class="small-btn">Restart</button>
+      </div>
+
+      <h2>Sort the colours</h2>
+      <p class="subtitle">Tap one tube, then tap another.</p>
+
+      <div id="tubeContainer" class="tube-container"></div>
+
+      <p id="gameMessage" class="message"></p>
+    </section>
+  </div>
+</body>
+</html>
