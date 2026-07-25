@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Planner</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="meals.html" class="nav-link">Meals</a>
+    </div>
+  </nav>
+
+  <header class="topbar">
+    <div class="container">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-primary" id="manageCategoriesBtn">Manage categories</button>
+        </div>
+
+        <div class="toolbar-right">
+          <button class="btn" id="prevWeekBtn" aria-label="Previous week">←</button>
+          <div class="week-title" id="weekTitle">Week</div>
+          <button class="btn" id="nextWeekBtn" aria-label="Next week">→</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="planner-grid" id="plannerGrid"></section>
+  </main>
+
+  <dialog id="entryDialog">
+    <form class="modal" id="entryForm" method="dialog">
+      <h2 id="entryDialogTitle">Add entry</h2>
+
+      <input type="hidden" id="entryDate" />
+      <input type="hidden" id="editingEntryId" />
+
+      <div class="field">
+        <label for="entryCategory">Category</label>
+        <select id="entryCategory" required></select>
+      </div>
+
+      <div class="field">
+        <label for="entryType">Entry type</label>
+        <select id="entryType" required>
+          <option value="saved">Saved meal</option>
+          <option value="custom">Custom note</option>
+        </select>
+      </div>
+
+      <div class="field" id="savedMealWrap">
+        <label for="savedMealSelect">Saved meal</label>
+        <select id="savedMealSelect"></select>
+      </div>
+
+      <div class="field" id="customNoteWrap" style="display: none;">
+        <label for="customNote">Custom note</label>
+        <textarea id="customNote" placeholder="Write your note here..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn" id="cancelEntryBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="categoryDialog">
+    <div class="modal">
+      <h2>Categories</h2>
+
+      <div class="field">
+        <label for="categoryName">Category name</label>
+        <input id="categoryName" type="text" placeholder="e.g. Dinner" />
+      </div>
+
+      <div class="field">
+        <label for="categoryColor">Colour</label>
+        <input id="categoryColor" type="color" value="#f4b183" />
+      </div>
+
+      <div class="modal-actions modal-actions-left">
+        <button type="button" class="btn btn-primary" id="saveCategoryBtn">Add category</button>
+      </div>
+
+      <p class="helper">Edit or delete existing categories below.</p>
+
+      <div class="category-list" id="categoryList"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn" id="closeCategoryBtn">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
