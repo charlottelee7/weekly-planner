@@ -18,13 +18,15 @@
     <div class="container">
       <div class="toolbar">
         <div class="toolbar-left">
-          <button class="btn btn-primary" id="manageCategoriesBtn">Manage categories</button>
+          <button class="btn btn-primary" id="manageCategoriesBtn" type="button">
+            Manage categories
+          </button>
         </div>
 
         <div class="toolbar-right">
-          <button class="btn" id="prevWeekBtn" aria-label="Previous week">←</button>
+          <button class="btn" id="prevWeekBtn" type="button" aria-label="Previous week">←</button>
           <div class="week-title" id="weekTitle">Week</div>
-          <button class="btn" id="nextWeekBtn" aria-label="Next week">→</button>
+          <button class="btn" id="nextWeekBtn" type="button" aria-label="Next week">→</button>
         </div>
       </div>
     </div>
@@ -35,7 +37,7 @@
   </main>
 
   <dialog id="entryDialog">
-    <form class="modal" id="entryForm" method="dialog">
+    <form class="modal" id="entryForm">
       <h2 id="entryDialogTitle">Add entry</h2>
 
       <input type="hidden" id="entryDate" />
@@ -72,30 +74,40 @@
   </dialog>
 
   <dialog id="categoryDialog">
-    <div class="modal">
-      <h2>Categories</h2>
-
-      <div class="field">
-        <label for="categoryName">Category name</label>
-        <input id="categoryName" type="text" placeholder="e.g. Dinner" />
+    <div class="modal category-modal">
+      <div class="modal-header">
+        <div>
+          <h2>Categories</h2>
+          <p class="helper">Type a category name and pick a colour.</p>
+        </div>
       </div>
 
-      <div class="field">
-        <label for="categoryColor">Colour</label>
-        <input id="categoryColor" type="color" value="#f4b183" />
+      <div class="category-form-grid">
+        <div class="field">
+          <label for="categoryName">Category name</label>
+          <input
+            id="categoryName"
+            type="text"
+            placeholder="e.g. Dinner, Gym, Revision"
+          />
+        </div>
+
+        <div class="field">
+          <label for="categoryColor">Colour</label>
+          <div class="color-picker-row">
+            <input id="categoryColor" type="color" value="#f4b183" />
+            <span class="color-preview" id="colorPreview" aria-hidden="true"></span>
+          </div>
+        </div>
       </div>
 
-      <div class="modal-actions modal-actions-left">
+      <div class="modal-actions modal-actions-split">
+        <button type="button" class="btn" id="closeCategoryBtn">Close</button>
         <button type="button" class="btn btn-primary" id="saveCategoryBtn">Add category</button>
       </div>
 
       <p class="helper">Edit or delete existing categories below.</p>
-
       <div class="category-list" id="categoryList"></div>
-
-      <div class="modal-actions">
-        <button type="button" class="btn" id="closeCategoryBtn">Close</button>
-      </div>
     </div>
   </dialog>
 

@@ -117,26 +117,31 @@ if (plannerGrid) {
   const entryDateInput = document.getElementById("entryDate");
   const editingEntryIdInput = document.getElementById("editingEntryId");
   const entryCategorySelect = document.getElementById("entryCategory");
-  const cancelEntryBtn = document.getElementById("cancelEntryBtn");
-
-  const categoryDialog = document.getElementById("categoryDialog");
-  const categoryNameInput = document.getElementById("categoryName");
-  const categoryColorInput = document.getElementById("categoryColor");
-  const saveCategoryBtn = document.getElementById("saveCategoryBtn");
-  const categoryList = document.getElementById("categoryList");
-  const closeCategoryBtn = document.getElementById("closeCategoryBtn");
-
   const entryTypeSelect = document.getElementById("entryType");
   const savedMealWrap = document.getElementById("savedMealWrap");
   const savedMealSelect = document.getElementById("savedMealSelect");
   const customNoteWrap = document.getElementById("customNoteWrap");
   const customNoteInput = document.getElementById("customNote");
+  const cancelEntryBtn = document.getElementById("cancelEntryBtn");
+
+  const categoryDialog = document.getElementById("categoryDialog");
+  const categoryNameInput = document.getElementById("categoryName");
+  const categoryColorInput = document.getElementById("categoryColor");
+  const colorPreview = document.getElementById("colorPreview");
+  const saveCategoryBtn = document.getElementById("saveCategoryBtn");
+  const categoryList = document.getElementById("categoryList");
+  const closeCategoryBtn = document.getElementById("closeCategoryBtn");
 
   let currentWeekStart = getStartOfWeek(new Date());
+  let editingCategoryId = "";
+
+  function syncColorPreview() {
+    if (categoryColorInput && colorPreview) {
+      colorPreview.style.background = categoryColorInput.value || "#f4b183";
+    }
+  }
 
   function populateCategorySelect() {
-    if (!entryCategorySelect) return;
-
     entryCategorySelect.innerHTML = "";
 
     if (categories.length === 0) {
@@ -156,9 +161,8 @@ if (plannerGrid) {
   }
 
   function populateSavedMealSelect(categoryId, selectedMealId = "") {
-    if (!savedMealSelect) return;
-
     savedMealSelect.innerHTML = "";
+
     const mealsForCategory = savedMeals.filter((meal) => meal.categoryId === categoryId);
 
     if (mealsForCategory.length === 0) {
@@ -181,9 +185,7 @@ if (plannerGrid) {
   }
 
   function updateEntryTypeUI(selectedMealId = "") {
-    if (!entryTypeSelect || !savedMealWrap || !customNoteWrap) return;
-
-    const categoryId = entryCategorySelect ? entryCategorySelect.value : "";
+    const categoryId = entryCategorySelect.value;
 
     if (entryTypeSelect.value === "saved") {
       savedMealWrap.style.display = "block";
@@ -195,6 +197,43 @@ if (plannerGrid) {
     }
   }
 
+  function openEntryDialog(dateKey, entry = null) {
+    populateCategorySelect();
+
+    entryDateInput.value = dateKey;
+    editingEntryIdInput.value = entry ? entry.id : "";
+
+    if (entry) {
+      entryDialogTitle.textContent = "Edit entry";
+      entryCategorySelect.value = entry.categoryId || "";
+      entryTypeSelect.value = entry.type || "custom";
+
+      if (entry.type === "saved") {
+        updateEntryTypeUI(entry.mealId || "");
+        customNoteInput.value = "";
+      } else {
+        updateEntryTypeUI();
+        customNoteInput.value = entry.text || "";
+      }
+    } else {
+      entryDialogTitle.textContent = "Add entry";
+      entryForm.reset();
+      editingEntryIdInput.value = "";
+      entryDateInput.value = dateKey;
+      populateCategorySelect();
+      entryTypeSelect.value = "saved";
+      updateEntryTypeUI();
+    }
+
+    entryDialog.showModal();
+  }
+
+  function closeEntryDialog() {
+    entryDialog.close();
+    entryForm.reset();
+    editingEntryIdInput.value = "";
+  }
+
   function renderPlanner() {
     plannerGrid.innerHTML = "";
     weekTitle.textContent = formatWeekTitle(currentWeekStart);
@@ -204,6 +243,7 @@ if (plannerGrid) {
     dayNames.forEach((dayName, index) => {
       const date = new Date(currentWeekStart);
       date.setDate(currentWeekStart.getDate() + index);
+
       const dateKey = formatDateKey(date);
       const dayEntries = entries[dateKey] || [];
 
@@ -213,60 +253,66 @@ if (plannerGrid) {
       const header = document.createElement("div");
       header.className = "day-header";
       header.innerHTML = `
-        <div>
-          <div class="day-name">${dayName}</div>
-          <div class="day-date">${formatDisplayDate(date)}</div>
+        <div class="day-top">
+          <div>
+            <div class="day-name">${dayName}</div>
+            <div class="day-date">${formatDisplayDate(date)}</div>
+          </div>
+          <button type="button" class="btn" data-add-entry="${dateKey}">Add</button>
         </div>
-        <button class="btn" data-add-date="${dateKey}">Add</button>
       `;
 
-      const entriesWrap = document.createElement("div");
-      entriesWrap.className = "entries";
+      const list = document.createElement("div");
+      list.className = "entries";
 
       if (dayEntries.length === 0) {
-        const empty = document.createElement("p");
-        empty.className = "empty-text";
-        empty.textContent = "No items yet.";
-        entriesWrap.appendChild(empty);
+        list.innerHTML = `<p class="empty-text">Nothing planned yet.</p>`;
       } else {
         dayEntries.forEach((entry) => {
-          const category = categories.find((cat) => cat.id === entry.categoryId);
-          const color = category ? category.color : "#d9d9d9";
-          const categoryName = category ? category.name : "Deleted category";
+          const category = categories.find((item) => item.id === entry.categoryId);
+          const bg = category ? hexToRgba(category.color, 0.32) : "rgba(220,220,220,0.5)";
+          const label = category ? category.name : "Unknown category";
 
-          const card = document.createElement("div");
+          let text = entry.text || "";
+          if (entry.type === "saved" && entry.mealId) {
+            const meal = savedMeals.find((item) => item.id === entry.mealId);
+            text = meal ? meal.title : "Saved meal";
+          }
+
+          const card = document.createElement("article");
           card.className = "entry-card";
-          card.style.background = hexToRgba(color, 0.35);
-          card.style.borderLeft = `4px solid ${color}`;
-
-          const text = entry.text || "";
-          const meta = entry.source === "savedMeal" ? "Saved meal" : "Custom note";
+          card.style.background = bg;
 
           card.innerHTML = `
             <div class="entry-top">
-              <div class="entry-category">${escapeHtml(categoryName)}</div>
-              <div class="entry-actions">
-                <button class="mini-btn" data-edit-entry="${entry.id}" data-date="${dateKey}">Edit</button>
-                <button class="mini-btn" data-delete-entry="${entry.id}" data-date="${dateKey}">Delete</button>
-              </div>
+              <div class="entry-category">${escapeHtml(label)}</div>
             </div>
             <div class="entry-text">${escapeHtml(text)}</div>
-            <div class="entry-meta">${meta}</div>
+            <div class="entry-actions">
+              <button type="button" class="mini-btn" data-edit-entry="${dateKey}" data-entry-id="${entry.id}">Edit</button>
+              <button type="button" class="mini-btn" data-delete-entry="${dateKey}" data-entry-id="${entry.id}">Delete</button>
+            </div>
           `;
 
-          entriesWrap.appendChild(card);
+          list.appendChild(card);
         });
       }
 
       column.appendChild(header);
-      column.appendChild(entriesWrap);
+      column.appendChild(list);
       plannerGrid.appendChild(column);
     });
   }
 
-  function renderCategories() {
-    if (!categoryList) return;
+  function resetCategoryForm() {
+    editingCategoryId = "";
+    categoryNameInput.value = "";
+    categoryColorInput.value = "#f4b183";
+    saveCategoryBtn.textContent = "Add category";
+    syncColorPreview();
+  }
 
+  function renderCategoryList() {
     categoryList.innerHTML = "";
 
     if (categories.length === 0) {
@@ -277,98 +323,112 @@ if (plannerGrid) {
     categories.forEach((category) => {
       const row = document.createElement("div");
       row.className = "category-row";
+
       row.innerHTML = `
-        <div class="category-row-left">
-          <span class="swatch" style="background:${category.color}"></span>
-          <span>${escapeHtml(category.name)}</span>
-        </div>
-        <div class="category-row-actions">
-          <button class="btn" data-edit-category="${category.id}">Edit</button>
-          <button class="btn btn-danger" data-delete-category="${category.id}">Delete</button>
-        </div>
+        <span class="swatch" style="background:${category.color}"></span>
+        <span>${escapeHtml(category.name)}</span>
+        <button type="button" class="btn" data-edit-category="${category.id}">Edit</button>
+        <button type="button" class="btn btn-danger" data-delete-category="${category.id}">Delete</button>
       `;
+
       categoryList.appendChild(row);
     });
   }
 
-  function openEntryDialog(dateKey, entryId = null) {
-    if (categories.length === 0) {
+  function startEditCategory(categoryId) {
+    const category = categories.find((item) => item.id === categoryId);
+    if (!category) return;
+
+    editingCategoryId = category.id;
+    categoryNameInput.value = category.name || "";
+    categoryColorInput.value = category.color || "#f4b183";
+    saveCategoryBtn.textContent = "Save changes";
+    syncColorPreview();
+    categoryNameInput.focus();
+  }
+
+  function saveCategory() {
+    const name = categoryNameInput.value.trim();
+    const color = categoryColorInput.value;
+
+    if (!name) {
+      alert("Please enter a category name.");
+      return;
+    }
+
+    if (editingCategoryId) {
+      const category = categories.find((item) => item.id === editingCategoryId);
+      if (!category) return;
+
+      category.name = name;
+      category.color = color;
+    } else {
+      categories.push({
+        id: makeId(),
+        name,
+        color
+      });
+    }
+
+    saveCategories();
+    populateCategorySelect();
+    renderCategoryList();
+    renderPlanner();
+    resetCategoryForm();
+  }
+
+  function deleteCategory(categoryId) {
+    categories = categories.filter((category) => category.id !== categoryId);
+
+    Object.keys(entries).forEach((dateKey) => {
+      entries[dateKey] = (entries[dateKey] || []).filter(
+        (entry) => entry.categoryId !== categoryId
+      );
+
+      if (entries[dateKey].length === 0) {
+        delete entries[dateKey];
+      }
+    });
+
+    savedMeals = savedMeals.filter((meal) => meal.categoryId !== categoryId);
+
+    saveCategories();
+    saveEntries();
+    saveMeals();
+    populateCategorySelect();
+    renderCategoryList();
+    renderPlanner();
+    resetCategoryForm();
+  }
+
+  entryForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const dateKey = entryDateInput.value;
+    const editingId = editingEntryIdInput.value;
+    const categoryId = entryCategorySelect.value;
+    const type = entryTypeSelect.value;
+
+    if (!categoryId) {
       alert("Please create a category first.");
       return;
     }
 
-    populateCategorySelect();
-    entryForm.reset();
-    entryDateInput.value = dateKey;
-    editingEntryIdInput.value = "";
-    entryDialogTitle.textContent = "Add entry";
-
-    if (entryTypeSelect) {
-      entryTypeSelect.value = "saved";
-    }
-
-    if (entryId) {
-      const dayEntries = entries[dateKey] || [];
-      const entry = dayEntries.find((item) => item.id === entryId);
-      if (!entry) return;
-
-      editingEntryIdInput.value = entry.id;
-      entryCategorySelect.value = entry.categoryId || "";
-      entryDialogTitle.textContent = "Edit entry";
-
-      if (entry.source === "savedMeal") {
-        if (entryTypeSelect) {
-          entryTypeSelect.value = "saved";
-        }
-        updateEntryTypeUI(entry.mealId || "");
-      } else {
-        if (entryTypeSelect) {
-          entryTypeSelect.value = "custom";
-        }
-        updateEntryTypeUI();
-        if (customNoteInput) {
-          customNoteInput.value = entry.text || "";
-        }
-      }
-    } else {
-      updateEntryTypeUI();
-    }
-
-    entryDialog.showModal();
-  }
-
-  function saveEntry(event) {
-    event.preventDefault();
-
-    const dateKey = entryDateInput.value;
-    const categoryId = entryCategorySelect.value;
-    const editingId = editingEntryIdInput.value;
-
-    if (!dateKey || !categoryId) return;
-
     let text = "";
-    let source = "customNote";
-    let mealId = null;
+    let mealId = "";
 
-    if (entryTypeSelect && entryTypeSelect.value === "saved") {
-      const selectedMealId = savedMealSelect ? savedMealSelect.value : "";
-      const selectedMeal = savedMeals.find((meal) => meal.id === selectedMealId);
-
-      if (!selectedMeal) {
+    if (type === "saved") {
+      mealId = savedMealSelect.value;
+      if (!mealId) {
         alert("Please choose a saved meal.");
         return;
       }
-
-      text = selectedMeal.title;
-      source = "savedMeal";
-      mealId = selectedMeal.id;
     } else {
-      text = customNoteInput ? customNoteInput.value.trim() : "";
+      text = customNoteInput.value.trim();
       if (!text) {
-        alert("Please write a note.");
+        alert("Please enter a custom note.");
         return;
       }
-      source = "customNote";
     }
 
     if (!entries[dateKey]) {
@@ -376,188 +436,119 @@ if (plannerGrid) {
     }
 
     if (editingId) {
-      const existing = entries[dateKey].find((item) => item.id === editingId);
-      if (existing) {
-        existing.categoryId = categoryId;
-        existing.text = text;
-        existing.source = source;
-        existing.mealId = mealId;
+      const entry = entries[dateKey].find((item) => item.id === editingId);
+      if (entry) {
+        entry.categoryId = categoryId;
+        entry.type = type;
+        entry.mealId = mealId;
+        entry.text = text;
       }
     } else {
       entries[dateKey].push({
         id: makeId(),
         categoryId,
-        text,
-        source,
-        mealId
+        type,
+        mealId,
+        text
       });
     }
 
     saveEntries();
-    entryDialog.close();
     renderPlanner();
-  }
-
-  function addCategory() {
-    const name = categoryNameInput.value.trim();
-    const color = categoryColorInput.value;
-
-    if (!name) {
-      alert("Enter a category name.");
-      return;
-    }
-
-    categories.push({
-      id: makeId(),
-      name,
-      color
-    });
-
-    saveCategories();
-    categoryNameInput.value = "";
-    categoryColorInput.value = "#f4b183";
-    renderCategories();
-    renderPlanner();
-  }
-
-  function editCategory(categoryId) {
-    const category = categories.find((cat) => cat.id === categoryId);
-    if (!category) return;
-
-    const newName = prompt("Edit category name:", category.name);
-    if (newName === null) return;
-
-    const trimmedName = newName.trim();
-    if (!trimmedName) {
-      alert("Category name cannot be empty.");
-      return;
-    }
-
-    const newColor = prompt("Edit colour hex code:", category.color);
-    if (newColor === null) return;
-
-    category.name = trimmedName;
-    category.color = newColor.trim() || category.color;
-
-    saveCategories();
-    renderCategories();
-    renderPlanner();
-  }
-
-  function deleteCategory(categoryId) {
-    const isUsedInEntries = Object.values(entries).some((dayEntries) =>
-      dayEntries.some((entry) => entry.categoryId === categoryId)
-    );
-
-    const isUsedInMeals = savedMeals.some((meal) => meal.categoryId === categoryId);
-
-    if (isUsedInEntries || isUsedInMeals) {
-      const confirmed = confirm(
-        "This category is used in planner items or meals. Delete it anyway?"
-      );
-      if (!confirmed) return;
-    }
-
-    categories = categories.filter((cat) => cat.id !== categoryId);
-    savedMeals = savedMeals.filter((meal) => meal.categoryId !== categoryId);
-
-    saveCategories();
-    saveMeals();
-    renderCategories();
-    renderPlanner();
-  }
+    closeEntryDialog();
+  });
 
   plannerGrid.addEventListener("click", (event) => {
-    const addBtn = event.target.closest("[data-add-date]");
+    const addBtn = event.target.closest("[data-add-entry]");
     const editBtn = event.target.closest("[data-edit-entry]");
     const deleteBtn = event.target.closest("[data-delete-entry]");
 
     if (addBtn) {
-      openEntryDialog(addBtn.dataset.addDate);
+      openEntryDialog(addBtn.dataset.addEntry);
       return;
     }
 
     if (editBtn) {
-      openEntryDialog(editBtn.dataset.date, editBtn.dataset.editEntry);
+      const dateKey = editBtn.dataset.editEntry;
+      const entryId = editBtn.dataset.entryId;
+      const entry = (entries[dateKey] || []).find((item) => item.id === entryId);
+      if (entry) {
+        openEntryDialog(dateKey, entry);
+      }
       return;
     }
 
     if (deleteBtn) {
-      const dateKey = deleteBtn.dataset.date;
-      const entryId = deleteBtn.dataset.deleteEntry;
-      entries[dateKey] = (entries[dateKey] || []).filter((entry) => entry.id !== entryId);
+      const dateKey = deleteBtn.dataset.deleteEntry;
+      const entryId = deleteBtn.dataset.entryId;
+      entries[dateKey] = (entries[dateKey] || []).filter((item) => item.id !== entryId);
+
+      if (entries[dateKey].length === 0) {
+        delete entries[dateKey];
+      }
+
       saveEntries();
       renderPlanner();
     }
   });
 
-  if (categoryList) {
-    categoryList.addEventListener("click", (event) => {
-      const editBtn = event.target.closest("[data-edit-category]");
-      const deleteBtn = event.target.closest("[data-delete-category]");
+  entryCategorySelect.addEventListener("change", () => {
+    updateEntryTypeUI();
+  });
 
-      if (editBtn) {
-        editCategory(editBtn.dataset.editCategory);
-      }
+  entryTypeSelect.addEventListener("change", () => {
+    updateEntryTypeUI();
+  });
 
-      if (deleteBtn) {
-        deleteCategory(deleteBtn.dataset.deleteCategory);
-      }
-    });
+  cancelEntryBtn.addEventListener("click", () => {
+    closeEntryDialog();
+  });
+
+  if (categoryColorInput) {
+    categoryColorInput.addEventListener("input", syncColorPreview);
+    syncColorPreview();
   }
 
-  if (prevWeekBtn) {
-    prevWeekBtn.addEventListener("click", () => {
-      currentWeekStart.setDate(currentWeekStart.getDate() - 7);
-      currentWeekStart = getStartOfWeek(currentWeekStart);
-      renderPlanner();
-    });
-  }
+  saveCategoryBtn.addEventListener("click", saveCategory);
 
-  if (nextWeekBtn) {
-    nextWeekBtn.addEventListener("click", () => {
-      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-      currentWeekStart = getStartOfWeek(currentWeekStart);
-      renderPlanner();
-    });
-  }
+  categoryList.addEventListener("click", (event) => {
+    const editBtn = event.target.closest("[data-edit-category]");
+    const deleteBtn = event.target.closest("[data-delete-category]");
 
-  if (manageCategoriesBtn) {
-    manageCategoriesBtn.addEventListener("click", () => {
-      renderCategories();
-      categoryDialog.showModal();
-    });
-  }
+    if (editBtn) {
+      startEditCategory(editBtn.dataset.editCategory);
+      return;
+    }
 
-  if (saveCategoryBtn) {
-    saveCategoryBtn.addEventListener("click", addCategory);
-  }
+    if (deleteBtn) {
+      deleteCategory(deleteBtn.dataset.deleteCategory);
+    }
+  });
 
-  if (closeCategoryBtn) {
-    closeCategoryBtn.addEventListener("click", () => {
-      categoryDialog.close();
-    });
-  }
+  manageCategoriesBtn.addEventListener("click", () => {
+    renderCategoryList();
+    resetCategoryForm();
+    categoryDialog.showModal();
+  });
 
-  if (cancelEntryBtn) {
-    cancelEntryBtn.addEventListener("click", () => {
-      entryDialog.close();
-    });
-  }
+  closeCategoryBtn.addEventListener("click", () => {
+    resetCategoryForm();
+    categoryDialog.close();
+  });
 
-  if (entryForm) {
-    entryForm.addEventListener("submit", saveEntry);
-  }
+  prevWeekBtn.addEventListener("click", () => {
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    currentWeekStart = getStartOfWeek(currentWeekStart);
+    renderPlanner();
+  });
 
-  if (entryCategorySelect) {
-    entryCategorySelect.addEventListener("change", () => updateEntryTypeUI());
-  }
+  nextWeekBtn.addEventListener("click", () => {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    currentWeekStart = getStartOfWeek(currentWeekStart);
+    renderPlanner();
+  });
 
-  if (entryTypeSelect) {
-    entryTypeSelect.addEventListener("change", () => updateEntryTypeUI());
-  }
-
-  renderCategories();
+  populateCategorySelect();
   renderPlanner();
 }
 

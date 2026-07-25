@@ -154,6 +154,13 @@ textarea {
   gap: 8px;
 }
 
+.day-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
 .day-name {
   font-size: 1rem;
   font-weight: bold;
@@ -221,7 +228,7 @@ textarea {
 }
 
 dialog {
-  width: min(520px, calc(100vw - 24px));
+  width: min(560px, calc(100vw - 24px));
   border: none;
   border-radius: 16px;
   padding: 0;
@@ -271,8 +278,71 @@ dialog::backdrop {
   flex-wrap: wrap;
 }
 
-.modal-actions-left {
-  justify-content: flex-start;
+.category-modal {
+  gap: 18px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.category-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 14px;
+  align-items: end;
+}
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+}
+
+input[type="color"] {
+  width: 72px;
+  height: 46px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+.color-preview {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  background: #f4b183;
+  flex-shrink: 0;
+}
+
+.modal-actions-split {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-actions-split .btn {
+  min-width: 132px;
 }
 
 .category-list {
@@ -305,6 +375,11 @@ dialog::backdrop {
   font-size: 0.9rem;
 }
 
+.entry-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 @media (max-width: 980px) {
   .planner-grid {
     grid-template-columns: 1fr;
@@ -316,6 +391,7 @@ dialog::backdrop {
 
   .week-title {
     text-align: left;
+    min-width: auto;
   }
 
   .nav-inner {
@@ -325,35 +401,21 @@ dialog::backdrop {
   }
 }
 
-.category-row-left,
-.category-row-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+@media (max-width: 640px) {
+  .category-form-grid {
+    grid-template-columns: 1fr;
+  }
 
-.entry-meta {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
+  .modal-actions-split {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 
-.meal-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 14px;
-}
+  .modal-actions-split .btn {
+    width: 100%;
+  }
 
-.meal-card h3 {
-  font-size: 1.05rem;
-}
-
-.meal-card-actions {
-  display: flex;
-  justify-content: flex-end;
+  .category-row {
+    grid-template-columns: 24px 1fr;
+  }
 }
