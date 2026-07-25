@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meals</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="meals.html" class="nav-link active">Meals</a>
+    </div>
+  </nav>
+
+  <header class="topbar">
+    <div class="container">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <h1 style="font-size: 1.4rem;">Meals</h1>
+        </div>
+        <div class="toolbar-right">
+          <p class="helper">Save meal ideas by category to reuse in the planner.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="field">
+      <label for="mealCategorySelect">Category</label>
+      <select id="mealCategorySelect"></select>
+    </div>
+
+    <form id="mealForm" class="modal" style="margin-top: 16px;">
+    <input type="hidden" id="editingMealId" />
+
+    <div class="field">
+        <label for="mealTitle">Meal title</label>
+        <input id="mealTitle" type="text" placeholder="e.g. Pasta Bake" required />
+    </div>
+
+    <div class="field">
+        <label for="mealDescription">Small description</label>
+        <textarea id="mealDescription" placeholder="Optional notes..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+        <button type="submit" class="btn btn-primary" id="mealSubmitBtn">Add meal</button>
+    </div>
+    </form>
+
+<section id="mealsList" style="margin-top: 20px;"></section>
+    <section id="mealsList" style="margin-top: 20px;"></section>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

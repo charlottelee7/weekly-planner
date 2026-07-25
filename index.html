@@ -1,69 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Colour Sort Game</title>
-  <link rel="stylesheet" href="style.css">
-  <script defer src="app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Planner</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
-    <section id="homeScreen" class="screen">
-      <h1>Colour Sort Game</h1>
-      <p class="subtitle">Choose your setup, then tap start.</p>
+  <nav class="top-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="meals.html" class="nav-link">Meals</a>
+    </div>
+  </nav>
 
-      <div class="setup-box">
-        <label for="colourCount">Number of colours</label>
-        <select id="colourCount">
-          <option value="3">3</option>
-          <option value="4" selected>4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-        </select>
+  <header class="topbar">
+    <div class="container">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-primary" id="manageCategoriesBtn">Manage categories</button>
+        </div>
 
-        <label for="tubeCount">Number of tubes</label>
-        <select id="tubeCount">
-          <option value="5">5</option>
-          <option value="6" selected>6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-          <option value="13">13</option>
-          <option value="14">14</option>
-          <option value="15">15</option>
-          <option value="16">16</option>
-        </select>
-
-        <p id="setupMessage" class="message"></p>
-
-        <button id="startBtn" class="big-btn">Start</button>
+        <div class="toolbar-right">
+          <button class="btn" id="prevWeekBtn" aria-label="Previous week">←</button>
+          <div class="week-title" id="weekTitle">Week</div>
+          <button class="btn" id="nextWeekBtn" aria-label="Next week">→</button>
+        </div>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <section id="gameScreen" class="screen hidden">
-      <div class="top-bar">
-        <button id="backBtn" class="small-btn">Home</button>
-        <button id="undoBtn" class="small-btn">Undo</button>
-        <button id="restartBtn" class="small-btn">Restart</button>
+  <main class="container">
+    <section class="planner-grid" id="plannerGrid"></section>
+  </main>
+
+  <dialog id="entryDialog">
+    <form class="modal" id="entryForm" method="dialog">
+      <h2 id="entryDialogTitle">Add entry</h2>
+
+      <input type="hidden" id="entryDate" />
+      <input type="hidden" id="editingEntryId" />
+
+      <div class="field">
+        <label for="entryCategory">Category</label>
+        <select id="entryCategory" required></select>
       </div>
 
-      <h2>Sort the colours</h2>
-      <p class="subtitle">Tap one tube, then tap another.</p>
+      <div class="field">
+        <label for="entryType">Entry type</label>
+        <select id="entryType" required>
+          <option value="saved">Saved meal</option>
+          <option value="custom">Custom note</option>
+        </select>
+      </div>
 
-      <div id="tubeContainer" class="tube-container"></div>
+      <div class="field" id="savedMealWrap">
+        <label for="savedMealSelect">Saved meal</label>
+        <select id="savedMealSelect"></select>
+      </div>
 
-      <p id="gameMessage" class="message"></p>
-    </section>
-  </div>
+      <div class="field" id="customNoteWrap" style="display: none;">
+        <label for="customNote">Custom note</label>
+        <textarea id="customNote" placeholder="Write your note here..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn" id="cancelEntryBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="categoryDialog">
+    <div class="modal">
+      <h2>Categories</h2>
+
+      <div class="field">
+        <label for="categoryName">Category name</label>
+        <input id="categoryName" type="text" placeholder="e.g. Dinner" />
+      </div>
+
+      <div class="field">
+        <label for="categoryColor">Colour</label>
+        <input id="categoryColor" type="color" value="#f4b183" />
+      </div>
+
+      <div class="modal-actions modal-actions-left">
+        <button type="button" class="btn btn-primary" id="saveCategoryBtn">Add category</button>
+      </div>
+
+      <p class="helper">Edit or delete existing categories below.</p>
+
+      <div class="category-list" id="categoryList"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn" id="closeCategoryBtn">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js" defer></script>
 </body>
 </html>
